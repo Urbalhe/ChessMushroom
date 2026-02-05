@@ -1,281 +1,195 @@
 ﻿using System;
-
 using System.Collections.Generic;
-
 using System.Windows;
-
 using System.Windows.Controls;
-
 using System.Windows.Media;
-
 using System.Windows.Media.Imaging;
 
 namespace SakkGombas
-
 {
-
 	public partial class MainWindow : Window
-
 	{
+		const int TABLA_MERET = 8;
 
-		const int MERET = 8;
+		Button[,] tablaMezok = new Button[TABLA_MERET, TABLA_MERET];
 
-		Button[,] tabla = new Button[MERET, MERET];
+		Point figuraPozicio;              // figura aktualis pozicioja
+		List<Point> gombaPoziciok = new List<Point>();
 
-		Point babu;                 // figura pozicioja
+		int lepesekSzama = 0;
+		int nehezsegiSzint = 1;            // 1: Bastya, 2: Huszar, 3: Vezer
 
-		List<Point> gombak = new List<Point>();
-
-		int lepesSzam = 0;
-
-		int szint = 1;              // 1: Bastya, 2: Huszar, 3: Vezer
-
-		Random rnd = new Random();
+		Random veletlen = new Random();
 
 		// Tabla szinei
-
 		Brush vilagosMezo = new SolidColorBrush(Color.FromRgb(181, 216, 168));
 		Brush sotetMezo = new SolidColorBrush(Color.FromRgb(92, 138, 92));
 
 		public MainWindow()
-
 		{
-
 			InitializeComponent();
-
-			Tablacsinal();
-			UjJatek();
-
+			TablaLetrehoz();
+			UjJatekIndit();
 		}
 
-		void Tablacsinal()
-
+		void TablaLetrehoz()
 		{
-
 			Tabla.Children.Clear();
 
-			for (int y = 0; y < MERET; y++)
-
+			for (int y = 0; y < TABLA_MERET; y++)
 			{
-
-				for (int x = 0; x < MERET; x++)
-
+				for (int x = 0; x < TABLA_MERET; x++)
 				{
+					Button mezo = new Button
+					{
+						Tag = new Point(x, y),
+						Background = (x + y) % 2 == 0 ? vilagosMezo : sotetMezo,
+						BorderThickness = new Thickness(0)
+					};
 
-					Button b = new Button();
+					mezo.Click += MezoKattintas;
 
-					b.Tag = new Point(x, y);
-
-					b.Click += Mezo_Click;
-
-					// Sakk tabla zold szinekkel
-
-					b.Background = (x + y) % 2 == 0 ? vilagosMezo : sotetMezo;
-
-					// Gomb keret eltuntetese
-
-					b.BorderThickness = new Thickness(0);
-
-					tabla[x, y] = b;
-
-					Tabla.Children.Add(b);
-
+					tablaMezok[x, y] = mezo;
+					Tabla.Children.Add(mezo);
 				}
-
 			}
-
 		}
 
-		void UjJatek()
-
+		void UjJatekIndit()
 		{
-
-			// Figura kezdopozicio
-
-			babu = new Point(rnd.Next(MERET), rnd.Next(MERET));
+			// Figura kezdo pozicio
+			figuraPozicio = new Point(
+				veletlen.Next(TABLA_MERET),
+				veletlen.Next(TABLA_MERET)
+			);
 
 			// 5 gomba elhelyezese
+			gombaPoziciok.Clear();
 
-			gombak.Clear();
-
-			while (gombak.Count < 5)
-
+			while (gombaPoziciok.Count < 5)
 			{
+				Point ujGomba = new Point(
+					veletlen.Next(TABLA_MERET),
+					veletlen.Next(TABLA_MERET)
+				);
 
-				Point g = new Point(rnd.Next(MERET), rnd.Next(MERET));
-				if (!gombak.Contains(g) && g != babu)
-				gombak.Add(g);
-
+				if (!gombaPoziciok.Contains(ujGomba) && ujGomba != figuraPozicio)
+				{
+					gombaPoziciok.Add(ujGomba);
+				}
 			}
 
-			lepesSzam = 0;
-
-			Frissit();
-
+			lepesekSzama = 0;
+			FrissitTabla();
 		}
 
-		void Mezo_Click(object sender, RoutedEventArgs e)
-
+		void MezoKattintas(object sender, RoutedEventArgs e)
 		{
+			Button kattintottMezo = sender as Button;
+			Point celPozicio = (Point)kattintottMezo.Tag;
 
-			Button b = sender as Button;
-			Point cel = (Point)b.Tag;
-			if (SzabalyosLep(cel))
-
+			if (SzabalyosLepes(celPozicio))
 			{
-
-				babu = cel;
-
-				lepesSzam++;
+				figuraPozicio = celPozicio;
+				lepesekSzama++;
 
 				// Gomba felszedese
-
-				for (int i = gombak.Count - 1; i >= 0; i--)
-
+				for (int i = gombaPoziciok.Count - 1; i >= 0; i--)
 				{
-					if (gombak[i] == babu)
-
-					{gombak.RemoveAt(i);
-
+					if (gombaPoziciok[i] == figuraPozicio)
+					{
+						gombaPoziciok.RemoveAt(i);
 						break;
-
 					}
-
 				}
 
-				if (gombak.Count == 0)
-
+				if (gombaPoziciok.Count == 0)
 				{
+					MessageBox.Show(
+						$"Nehezsegi Szint: {nehezsegiSzint} | Vege a jateknak! Lepesek: {lepesekSzama}"
+					);
 
-					MessageBox.Show($"Nehézségi Szint: {szint} Vége a játéknak! Lépések: {lepesSzam}");
+					nehezsegiSzint++;
+					if (nehezsegiSzint > 3)
+						nehezsegiSzint = 1;
 
-					szint++;
-					if (szint > 3) szint = 1;
-					UjJatek();
-
+					UjJatekIndit();
 				}
-
 				else
-
 				{
-
-					Frissit();
-
+					FrissitTabla();
 				}
-
 			}
-
 		}
 
-		bool SzabalyosLep(Point cel)
-
+		bool SzabalyosLepes(Point cel)
 		{
+			int dx = (int)Math.Abs(cel.X - figuraPozicio.X);
+			int dy = (int)Math.Abs(cel.Y - figuraPozicio.Y);
 
-			int dx = (int)Math.Abs(cel.X - babu.X);
-
-			int dy = (int)Math.Abs(cel.Y - babu.Y);
-
-			switch (szint)
-
+			switch (nehezsegiSzint)
 			{
+				case 1: // Bastya
+					return cel.X == figuraPozicio.X || cel.Y == figuraPozicio.Y;
 
-				case 1: // Bastyaa
-
-					return cel.X == babu.X || cel.Y == babu.Y;
-
-				case 2: // Huszarr
-
+				case 2: // Huszar
 					return (dx == 2 && dy == 1) || (dx == 1 && dy == 2);
 
 				case 3: // Vezer
-
-					return cel.X == babu.X || cel.Y == babu.Y || dx == dy;
+					return cel.X == figuraPozicio.X ||
+						   cel.Y == figuraPozicio.Y ||
+						   dx == dy;
 
 				default:
-
 					return false;
-
 			}
-
 		}
 
-		void Frissit()
-
+		void FrissitTabla()
 		{
-
-			// Tabla torles
-
-			for (int y = 0; y < MERET; y++)
-
+			// Tabla torlese
+			for (int y = 0; y < TABLA_MERET; y++)
 			{
-
-				for (int x = 0; x < MERET; x++)
-
+				for (int x = 0; x < TABLA_MERET; x++)
 				{
-
-					tabla[x, y].Content = null;
-
-					tabla[x, y].IsEnabled = true;
-
+					tablaMezok[x, y].Content = null;
+					tablaMezok[x, y].IsEnabled = true;
 				}
-
 			}
 
-			// Figura kep szint szerint
+			// Figura kep kivalsztasa szint szerint
+			string kepNev =
+				nehezsegiSzint == 1 ? "feher.png" :
+				nehezsegiSzint == 2 ? "knight.png" :
+									  "queen.png";
 
-			string kepnev =
-
-				szint == 1 ? "feher.png" :
-
-				szint == 2 ? "knight.png" :
-
-							 "queen.png";
-
-			tabla[(int)babu.X, (int)babu.Y].Content = Kep("Images/" + kepnev);
+			tablaMezok[(int)figuraPozicio.X, (int)figuraPozicio.Y].Content =
+				KepBetolt("Images/" + kepNev);
 
 			// Gombak kirajzolasa
-
-			foreach (Point g in gombak)
-
+			foreach (Point gomba in gombaPoziciok)
 			{
-
-				tabla[(int)g.X, (int)g.Y].Content = Kep("Images/mushroom.png");
-
+				tablaMezok[(int)gomba.X, (int)gomba.Y].Content =
+					KepBetolt("Images/mushroom.png");
 			}
 
 			// Informacios szoveg
-
 			InfoSzoveg.Text =
-
-				$"Nehézségi Szint: {szint} | Lépések: {lepesSzam} |  Gombák Száma: {gombak.Count}/5";
-
+				$"Nehezsegi Szint: {nehezsegiSzint} | Lepesek: {lepesekSzama} | Gombak Szama: {gombaPoziciok.Count}/5";
 		}
 
-		Image Kep(string ut)
-
+		Image KepBetolt(string eleresiUt)
 		{
-
 			return new Image
-
 			{
-
-				Source = new BitmapImage(new Uri(ut, UriKind.Relative)),
-
+				Source = new BitmapImage(new Uri(eleresiUt, UriKind.Relative)),
 				Stretch = Stretch.Uniform
-
 			};
-
 		}
 
 		void UjJatek_Click(object sender, RoutedEventArgs e)
-
 		{
-
-			UjJatek();
-
+			UjJatekIndit();
 		}
-
 	}
-
 }
-
