@@ -190,7 +190,7 @@ namespace SakkGombas
 
 			{
 
-				case 1: // Bastya
+				case 1: // Bastyaa
 
 					return cel.X == babu.X || cel.Y == babu.Y;
 
