@@ -35,7 +35,6 @@ namespace SakkGombas
 		// Tabla szinei
 
 		Brush vilagosMezo = new SolidColorBrush(Color.FromRgb(181, 216, 168));
-
 		Brush sotetMezo = new SolidColorBrush(Color.FromRgb(92, 138, 92));
 
 		public MainWindow()
@@ -44,13 +43,12 @@ namespace SakkGombas
 
 			InitializeComponent();
 
-			TablaLetrehoz();
-
+			Tablacsinal();
 			UjJatek();
 
 		}
 
-		void TablaLetrehoz()
+		void Tablacsinal()
 
 		{
 
@@ -105,10 +103,8 @@ namespace SakkGombas
 			{
 
 				Point g = new Point(rnd.Next(MERET), rnd.Next(MERET));
-
 				if (!gombak.Contains(g) && g != babu)
-
-					gombak.Add(g);
+				gombak.Add(g);
 
 			}
 
@@ -123,10 +119,8 @@ namespace SakkGombas
 		{
 
 			Button b = sender as Button;
-
 			Point cel = (Point)b.Tag;
-
-			if (SzabalyosLepes(cel))
+			if (SzabalyosLep(cel))
 
 			{
 
@@ -139,12 +133,9 @@ namespace SakkGombas
 				for (int i = gombak.Count - 1; i >= 0; i--)
 
 				{
-
 					if (gombak[i] == babu)
 
-					{
-
-						gombak.RemoveAt(i);
+					{gombak.RemoveAt(i);
 
 						break;
 
@@ -159,9 +150,7 @@ namespace SakkGombas
 					MessageBox.Show($"Nehézségi Szint: {szint} Vége a játéknak! Lépések: {lepesSzam}");
 
 					szint++;
-
 					if (szint > 3) szint = 1;
-
 					UjJatek();
 
 				}
@@ -178,7 +167,7 @@ namespace SakkGombas
 
 		}
 
-		bool SzabalyosLepes(Point cel)
+		bool SzabalyosLep(Point cel)
 
 		{
 
