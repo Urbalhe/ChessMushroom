@@ -1,0 +1,32 @@
+﻿<Window x:Class="SakkGombas.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Sakk Gombagyujtes"
+        Height="700"
+        Width="650"
+        Background="#FF2E2E2E">
+
+	<DockPanel>
+		<!-- Felso vezerlopanel -->
+		<StackPanel DockPanel.Dock="Top" Margin="10">
+			<Button Content="Új Játék kezdése."
+                    Width="120"
+                    Height="35"
+                    Click="UjJatek_Click"
+                    Background="#FF4CAF50"
+                    Foreground="White"
+                    FontWeight="Bold"/>
+
+			<TextBlock x:Name="InfoSzoveg"
+                       FontSize="16"
+                       Margin="0,10,0,0"
+                       Foreground="White"/>
+		</StackPanel>
+
+		<!-- Sakk tabla -->
+		<UniformGrid x:Name="Tabla"
+                     Rows="8"
+                     Columns="8"
+                     Margin="10"/>
+	</DockPanel>
+</Window>
