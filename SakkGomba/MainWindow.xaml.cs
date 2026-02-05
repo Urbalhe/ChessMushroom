@@ -194,7 +194,7 @@ namespace SakkGombas
 
 					return cel.X == babu.X || cel.Y == babu.Y;
 
-				case 2: // Huszar
+				case 2: // Huszarr
 
 					return (dx == 2 && dy == 1) || (dx == 1 && dy == 2);
 
